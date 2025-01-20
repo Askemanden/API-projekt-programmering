@@ -7,6 +7,26 @@ let valutas = [
 ]
 let baseValutaDropdown;
 
+function dateToDays(dateString, referenceDate) {
+  const date = new Date(dateString);
+  referenceDate = new Date(referenceDate);
+  const timeDifference = date - referenceDate;
+  const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
+  return Math.floor(daysDifference);
+}
+
+function formatJSON(data) {
+  let start = data["start_date"]
+  let rates = {
+
+  }
+  for (const key in data["rates"]) {
+    rates[dateToDays(key, start)] = data["rates"][key];
+  }
+  console.log(rates);
+  return rates
+}
+
 function setup() {
   createCanvas(bredde, højde);
   baseValutaDropdown = createSelect(); 
@@ -24,8 +44,8 @@ function setup() {
 }
 
 function preload() {    //henter data fra en API og skriver det på skærmen
-  loadJSON("https://api.frankfurter.dev/v1/2025-01-12?base=EUR", data => {
-    console.log(data);
+  loadJSON("https://api.frankfurter.dev/v1/2024-01-01..2025-01-12?base=EUR", data => {
+    formatJSON(data);
   });
 }
 
@@ -34,20 +54,3 @@ function draw() {
 
 }
 
-function formatJSON(data) {
-  let start = data["start_date"]
-  let rates = {
-
-  }
-  for (const key in data["rates"]) {
-    rates[dataToDays(key)] = 
-  }
-}
-
-function dateToDays(dateString) {
-  const date = new Date(dateString);
-  const referenceDate = new Date("1970-01-01");
-  const timeDifference = date - referenceDate;
-  const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
-  return Math.floor(daysDifference);
-}
