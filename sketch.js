@@ -1,8 +1,8 @@
 let bredde = screen.width;   //bredden på skærmen
-let højde = screen.height*1.4;//højden
+let højde = screen.height*2;//højden
 const xbuffer = 100;
 const ybuffer = 50;
-const ymultiple = 20;
+const ymultiple = 10;
 const valutas = [
   'AUD','BGN','BRL','CAD','CHF', 'CYP','CNY','CZK','DKK', 'EEK','EUR','GBP','HKD', 'HRK',
   'HUF','IDR','ILS','INR','ISK','JPY','KRW', 'LTL', 'LVL', 'MTL','MXN','MYR','NOK',
@@ -22,13 +22,8 @@ function graph(data) {
 
   const step = (bredde-xbuffer)/period_length;
 
-  let i = 0;
-
   for (const valuta in data["rates"][0]){
     last_rate[valuta] = data["rates"][0][valuta];
-    fill(colours[valuta]);
-    text(valuta, 50, i*20+50);
-    i++;
   }
 
   for (const key in data["rates"]){
@@ -48,6 +43,20 @@ function graph(data) {
     circle(int(last_time*step+xbuffer),højde-(1*ymultiple+ybuffer),4)
     last_time = key;
   }
+  axis(xbuffer,ybuffer-højde, step);
+}
+
+function axis(x0, y0, step){
+  stroke(255,255,255);
+  fill(255,255,255);
+  line(x0,y0,bredde,y0);
+  line(x0,y0,x0,0);
+  let j = 0;
+  for (let i = 0; i < bredde; i+=200*step) {
+    text(int(j), x0+i, y0);
+    j+=200;
+  }
+
 }
 
 function dateToDays(dateString, referenceDate) {
@@ -95,6 +104,7 @@ function hslToRgb(h, s, l) {
 
 function setup() {
   createCanvas(bredde, højde);
+  background(0)
   defineColours();
   baseValutaDropdown = createSelect(); 
   baseValutaDropdown.position(0,0); //Remember to change pos coords when ui is made
@@ -108,13 +118,14 @@ function setup() {
     let selectedValutas = baseValutaDropdown.value();
     console.log('Selected Valuta:', selectedValutas);
   });
-  loadJSON("https://api.frankfurter.dev/v1/1999-01-04..2025-01-01?base=DKK", data => {
-    print(data['rates']);graph(formatJSON(data));
-  });
+  getData(valutas, 'EUR');
 }
 
-function getData(selectedValutas, base, start, end){
-  let url = `https://api.frankfurter.dev/v1/${start}..${end}?base=${base}`;
-  selectedValutas.forEach(valuta => url += `&symbols=${valuta}`);
-  return loadJSON(url);
+function getData(selectedValutas, base){
+  let url = `https://api.frankfurter.dev/v1/1999-01-01..?base=${base}&symbols=`;
+  selectedValutas.forEach(valuta => url += `${valuta},`);
+  print(url);
+  return loadJSON(url,  data => {
+    graph(formatJSON(data));
+  });
 }
