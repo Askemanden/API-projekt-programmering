@@ -3,15 +3,17 @@ let højde = screen.height*1.4;//højden
 const xbuffer = 100;
 const ybuffer = 50;
 const ymultiple = 20;
+let checkboxes = [];
 const valutas = [
   'AUD','BGN','BRL','CAD','CHF', 'CYP','CNY','CZK','DKK', 'EEK','EUR','GBP','HKD', 'HRK',
   'HUF','IDR','ILS','INR','ISK','JPY','KRW', 'LTL', 'LVL', 'MTL','MXN','MYR','NOK',
   'NZD','PHP','PLN', 'ROL', 'RUB','RON','SEK','SGD', 'SIT', 'SKK', 'TRL','THB','TRY','USD','ZAR'
 ];
 let colours = {
-}
+};
 let baseValutaDropdown;
 let data;
+
 
 function graph(data) {
   const start = data["start"];
@@ -26,14 +28,10 @@ function graph(data) {
 
   for (const valuta in data["rates"][0]){
     last_rate[valuta] = data["rates"][0][valuta];
-    fill(colours[valuta]);
-    text(valuta, 50, i*20+50);
-    i++;
   }
 
   for (const key in data["rates"]){
     for (const valuta in data["rates"][key]){
-      print(colours[valuta]+valuta);
       stroke(colours[valuta]);
       fill(colours[valuta]);
       const x = int(last_time*step+xbuffer);
@@ -77,7 +75,6 @@ function formatJSON(data) {
 
 function defineColours() {
   for (let i = 0; i < valutas.length; i++) {
-    print(valutas[i]);
     const hue = (i / valutas.length) * 360;
     const rgb = hslToRgb(hue, 50, 50);
     colours[valutas[i]] = color(rgb[0], rgb[1], rgb[2]);
@@ -96,26 +93,45 @@ function hslToRgb(h, s, l) {
 
 function setup() {
   createCanvas(bredde, højde);
+  background(0)
   defineColours();
-  baseValutaDropdown = createSelect(); 
-  baseValutaDropdown.position(0,0); //Remember to change pos coords when ui is made
-  
-//Makes currency options.
-  valutas.forEach(valutas => {
-    baseValutaDropdown.option(valutas);
-  });
-
-  baseValutaDropdown.changed(() =>  {
-    let selectedValutas = baseValutaDropdown.value();
-    console.log('Selected Valuta:', selectedValutas);
-  });
+  dropdown();
+  checkboxMenu();
+  let submitButton = createButton('Submit selections').position(70,2)
+  submitButton.mousepressed(submit())
   loadJSON("https://api.frankfurter.dev/v1/1999-01-04..2025-01-01?base=DKK", data => {
     print(data['rates']);graph(formatJSON(data));
   });
 }
 
-function preload() {    //henter data fra en API og skriver det på skærmen
-  loadJSON("https://api.frankfurter.dev/v1/2024-01-01..2025-01-12?base=EUR", data => {
-    return;
+function dropdown(){
+  baseValutaDropdown = createSelect(); 
+  baseValutaDropdown.position(4,2); //Remember to change pos coords when ui is made
+  
+  valutas.forEach(valuta => {
+    baseValutaDropdown.option(valuta);
   });
+
+  baseValutaDropdown.changed(() =>  {
+    let selectedValuta = baseValutaDropdown.value();
+    console.log('Selected Valuta:', selectedValuta);
+  });
+}
+
+function checkboxMenu(){
+  let i=0
+  valutas.forEach(valutaCheckbox => {
+    checkboxes[i]=createCheckbox(valutaCheckbox,false).position(0,30+i*20).style('color',colours[valutaCheckbox]);
+    i++
+  })
+}
+
+function submit(){
+  let checked = [];
+  for(let i=0; i<checkboxes.length; i++){
+    if (checkboxes[i].checked){
+    checked.push(checkboxes[i].label)
+    }
+  }
+  getData(checked,baseValutaDropdown.selected())
 }
