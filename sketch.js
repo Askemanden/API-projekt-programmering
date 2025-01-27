@@ -58,31 +58,6 @@ function graph(data) {
   }
 }
 
-function dateToDays(dateString, referenceDate) {
-  const date = new Date(dateString);
-  referenceDate = new Date(referenceDate);
-  const timeDifference = date - referenceDate;
-  const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
-  return Math.floor(daysDifference);
-}
-
-function formatJSON(data) {
-  let start = data["start_date"];
-  let rates = {
-
-  }
-  for (const key in data["rates"]) {
-    rates[dateToDays(key, start)] = data["rates"][key];
-  }
-
-  return {
-    "rates" : rates, 
-    "start" : start,
-    "end" : data["end_date"],
-    "base" : data["base"]
-  }
-}
-
 function defineColours() {
   for (let i = 0; i < valutas.length; i++) {
     print(valutas[i]);
@@ -99,27 +74,6 @@ function hslToRgb(h, s, l) {
   const a = s * Math.min(l, 1 - l);
   const f = n => l - a * Math.max(Math.min(k(n) - 3, 9 - k(n), 1), -1);
   return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
-}
-
-
-function setup() {
-  createCanvas(bredde, højde);
-  defineColours();
-  baseValutaDropdown = createSelect(); 
-  baseValutaDropdown.position(0,0); //Remember to change pos coords when ui is made
-  
-//Makes currency options.
-  valutas.forEach(valutas => {
-    baseValutaDropdown.option(valutas);
-  });
-
-  baseValutaDropdown.changed(() =>  {
-    let selectedValutas = baseValutaDropdown.value();
-    console.log('Selected Valuta:', selectedValutas);
-  });
-  loadJSON("https://api.frankfurter.dev/v1/1999-01-04..2025-01-01?base=DKK", data => {
-    print(data['rates']);graph(formatJSON(data));
-  });
 }
 
 function preload() {    //henter data fra en API og skriver det på skærmen
@@ -177,13 +131,19 @@ function formatJSON(data) { //Formaterer JSON dataen så den er nemmere at arbej
 
   }
   for (const key in data["rates"]) {
-    rates[dataToDays(key)] = data["rates"][key]; 
+    rates[dateToDays(key)] = data["rates"][key]; 
+  }
+  return {
+    "rates" : rates, 
+    "start" : start,
+    "end" : data["end_date"],
+    "base" : data["base"]
   }
 }
 
-function dateToDays(dateString) { //Omdanner en dato til dage siden 1970-01-01
+function dateToDays(dateString, referenceDate) {   //Omdanner datoer til dage
   const date = new Date(dateString);
-  const referenceDate = new Date("1970-01-01");
+  referenceDate = new Date(referenceDate);
   const timeDifference = date - referenceDate;
   const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
   return Math.floor(daysDifference);
