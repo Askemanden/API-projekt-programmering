@@ -98,7 +98,7 @@ function setup() {
   dropdown();
   checkboxMenu();
   let submitButton = createButton('Submit selections').position(70,2)
-  submitButton.mousepressed(submit())
+  submitButton.mousePressed(submit())
   loadJSON("https://api.frankfurter.dev/v1/1999-01-04..2025-01-01?base=DKK", data => {
     print(data['rates']);graph(formatJSON(data));
   });
