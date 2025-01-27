@@ -3,15 +3,17 @@ let højde = screen.height*2;//højden
 const xbuffer = 100;
 const ybuffer = 50;
 const ymultiple = 10;
+let checkboxes = [];
 const valutas = [
   'AUD','BGN','BRL','CAD','CHF', 'CYP','CNY','CZK','DKK', 'EEK','EUR','GBP','HKD', 'HRK',
   'HUF','IDR','ILS','INR','ISK','JPY','KRW', 'LTL', 'LVL', 'MTL','MXN','MYR','NOK',
   'NZD','PHP','PLN', 'ROL', 'RUB','RON','SEK','SGD', 'SIT', 'SKK', 'TRL','THB','TRY','USD','ZAR'
 ];
 let colours = {
-}
+};
 let baseValutaDropdown;
 let data;
+
 
 function graph(data) {
   const start = data["start"];
@@ -28,7 +30,6 @@ function graph(data) {
 
   for (const key in data["rates"]){
     for (const valuta in data["rates"][key]){
-      print(colours[valuta]+valuta);
       stroke(colours[valuta]);
       fill(colours[valuta]);
       const x = int(last_time*step+xbuffer);
@@ -106,19 +107,43 @@ function setup() {
   createCanvas(bredde, højde);
   background(0)
   defineColours();
+  dropdown();
+  checkboxMenu();
+  let submitButton = createButton('Submit selections').position(70,2)
+  submitButton.mousePressed(submit())
+  getData(valutas, 'EUR');
+}
+
+function dropdown(){
   baseValutaDropdown = createSelect(); 
-  baseValutaDropdown.position(0,0); //Remember to change pos coords when ui is made
+  baseValutaDropdown.position(4,2); //Remember to change pos coords when ui is made
   
-//Makes currency options.
-  valutas.forEach(valutas => {
-    baseValutaDropdown.option(valutas);
+  valutas.forEach(valuta => {
+    baseValutaDropdown.option(valuta);
   });
 
   baseValutaDropdown.changed(() =>  {
-    let selectedValutas = baseValutaDropdown.value();
-    console.log('Selected Valuta:', selectedValutas);
+    let selectedValuta = baseValutaDropdown.value();
+    console.log('Selected Valuta:', selectedValuta);
   });
-  getData(valutas, 'EUR');
+}
+
+function checkboxMenu(){
+  let i=0
+  valutas.forEach(valutaCheckbox => {
+    checkboxes[i]=createCheckbox(valutaCheckbox,false).position(0,30+i*20).style('color',colours[valutaCheckbox]);
+    i++
+  })
+}
+
+function submit(){
+  let checked = [];
+  for(let i=0; i<checkboxes.length; i++){
+    if (checkboxes[i].checked){
+    checked.push(checkboxes[i].label)
+    }
+  }
+  getData(checked,baseValutaDropdown.selected())
 }
 
 function getData(selectedValutas, base){
