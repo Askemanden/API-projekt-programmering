@@ -192,7 +192,20 @@ function dateToDays(dateString) { //Omdanner en dato til dage siden 1970-01-01
 
 function setup() {
   createCanvas(bredde, højde);
-  SkabDropdown(baseValutaDropdown, 10, 10); //Laver en dropdown menu
+  defineColours();
+  baseValutaDropdown = createSelect(); 
+  baseValutaDropdown.position(0,0); //Remember to change pos coords when ui is made
   
-  SetupKnapper(); //Laver alle knapperne
+//Makes currency options.
+  valutas.forEach(valutas => {
+    baseValutaDropdown.option(valutas);
+  });
+
+  baseValutaDropdown.changed(() =>  {
+    let selectedValutas = baseValutaDropdown.value();
+    console.log('Selected Valuta:', selectedValutas);
+  });
+  loadJSON("https://api.frankfurter.dev/v1/1999-01-04..2025-01-01?base=DKK", data => {
+    print(data['rates']);graph(formatJSON(data));
+  });
 }
