@@ -1,13 +1,5 @@
 let bredde = screen.width;   //bredden på skærmen
-let højde = screen.height*1.4;//højden på skærmen
-let selectedValuta; //Valutaen der er valgt
-let symbolValutaDropdown;
-            //x, y, tekst, xStørrelse, yStørrelse, fontStørrelse
-let knap1 = [200, 300, "Vis valg", 100, 50, 20];
-let totaleknapper = [knap1]; //En liste over alle knapperne
-let buttonSize = [100, 50]; //Størrelsen på knapperne
-let knapper = []; //En liste til at holde på knapperne
-
+let højde = screen.height*1.4;//højden
 const xbuffer = 100;
 const ybuffer = 50;
 const ymultiple = 20;
@@ -58,9 +50,33 @@ function graph(data) {
   }
 }
 
+function dateToDays(dateString, referenceDate) {
+  const date = new Date(dateString);
+  referenceDate = new Date(referenceDate);
+  const timeDifference = date - referenceDate;
+  const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
+  return Math.floor(daysDifference);
+}
+
+function formatJSON(data) {
+  let start = data["start_date"];
+  let rates = {
+
+  }
+  for (const key in data["rates"]) {
+    rates[dateToDays(key, start)] = data["rates"][key];
+  }
+
+  return {
+    "rates" : rates, 
+    "start" : start,
+    "end" : data["end_date"],
+    "base" : data["base"]
+  }
+}
+
 function defineColours() {
   for (let i = 0; i < valutas.length; i++) {
-    print(valutas[i]);
     const hue = (i / valutas.length) * 360;
     const rgb = hslToRgb(hue, 50, 50);
     colours[valutas[i]] = color(rgb[0], rgb[1], rgb[2]);
@@ -74,79 +90,6 @@ function hslToRgb(h, s, l) {
   const a = s * Math.min(l, 1 - l);
   const f = n => l - a * Math.max(Math.min(k(n) - 3, 9 - k(n), 1), -1);
   return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
-}
-
-function preload() {    //henter data fra en API og skriver det på skærmen
-  loadJSON("https://api.frankfurter.dev/v1/2024-01-01..2025-01-12?base=EUR", data => {
-    return;
-  });
-}
-
-///////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-function SetupKnapper() { //Laver alle knapperne
-    for (i = 0; i < totaleknapper.length; i++) {
-    knapper = new SkabKnap(
-    totaleknapper[i][0],
-    totaleknapper[i][1],
-    totaleknapper[i][2], //📎
-    totaleknapper[i][3],
-    totaleknapper[i][4], // Parametre til at skabe en knap.
-    totaleknapper[i][5]
-    );
-  }
-}
-
-// En funktion, som skaber en knap, ved de givne koordinater, med den givne størrelse og label. koordinaterne som bliver inputtet er knappens midtpunkt.
-function SkabKnap(x = 0, y = 0, tekst = "", xStørrelse=buttonSize[0], yStørrelse=buttonSize[1], fontStørrelse=44) {
-  let knap = createButton(tekst)
-    .position(x-xStørrelse/2, y-yStørrelse/2)
-    .style("font-size", str(fontStørrelse)+"px")
-    .size(xStørrelse, yStørrelse)
-    .mousePressed( () => {
-      console.log(selectedValuta+" Det Virker, YAY!");
-      SkabDropdown(symbolValutaDropdown, 10, 70);
-    });
-}
-
-function SkabDropdown(navn, x, y) { //Laver en dropdown menu
-  navn = createSelect();
-  navn.position(x, y);
-  valutas.forEach(valutas => {
-    if (valutas !== selectedValuta) {
-      navn.option(valutas);
-    }
-  });
-  navn.changed(() => {
-    selectedValuta = navn.value();
-  });
-  return navn;
-}
-
-///////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-function formatJSON(data) { //Formaterer JSON dataen så den er nemmere at arbejde med
-  let start = data["start_date"]
-  let rates = {
-
-  }
-  for (const key in data["rates"]) {
-    rates[dateToDays(key)] = data["rates"][key]; 
-  }
-  return {
-    "rates" : rates, 
-    "start" : start,
-    "end" : data["end_date"],
-    "base" : data["base"]
-  }
-}
-
-function dateToDays(dateString, referenceDate) {   //Omdanner datoer til dage
-  const date = new Date(dateString);
-  referenceDate = new Date(referenceDate);
-  const timeDifference = date - referenceDate;
-  const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
-  return Math.floor(daysDifference);
 }
 
 
@@ -168,4 +111,10 @@ function setup() {
   loadJSON("https://api.frankfurter.dev/v1/1999-01-04..2025-01-01?base=DKK", data => {
     print(data['rates']);graph(formatJSON(data));
   });
+}
+
+function getData(selectedValutas, base, start, end){
+  let url = `https://api.frankfurter.dev/v1/${start}..${end}?base=${base}`;
+  selectedValutas.forEach(valuta => url += `&symbols=${valuta}`);
+  return loadJSON(url);
 }
