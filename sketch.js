@@ -113,9 +113,3 @@ function setup() {
     print(data['rates']);graph(formatJSON(data));
   });
 }
-
-function preload() {    //henter data fra en API og skriver det på skærmen
-  loadJSON("https://api.frankfurter.dev/v1/2024-01-01..2025-01-12?base=EUR", data => {
-    return;
-  });
-}
