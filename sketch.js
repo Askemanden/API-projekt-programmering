@@ -135,3 +135,9 @@ function submit(){
   }
   getData(checked,baseValutaDropdown.selected())
 }
+
+function getData(selectedValutas, base, start, end){
+  let url = `https://api.frankfurter.dev/v1/${start}..${end}?base=${base}`;
+  selectedValutas.forEach(valuta => url += `&symbols=${valuta}`);
+  return loadJSON(url);
+}
