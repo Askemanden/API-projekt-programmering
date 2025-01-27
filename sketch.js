@@ -77,7 +77,6 @@ function formatJSON(data) {
 
 function defineColours() {
   for (let i = 0; i < valutas.length; i++) {
-    print(valutas[i]);
     const hue = (i / valutas.length) * 360;
     const rgb = hslToRgb(hue, 50, 50);
     colours[valutas[i]] = color(rgb[0], rgb[1], rgb[2]);
