@@ -2,7 +2,9 @@ let bredde = screen.width;   //bredden på skærmen
 let højde = screen.height*2;//højden
 const xbuffer = 100;
 const ybuffer = 50;
-const ymultiple = 10;
+let ymultipleSlider;
+let ymultipleLabel;
+let sliderValue;
 let checkboxes = [];
 const valutas = [
   'AUD','BGN','BRL','CAD','CHF', 'CYP','CNY','CZK','DKK', 'EEK','EUR','GBP','HKD', 'HRK',
@@ -16,6 +18,8 @@ let data;
 
 
 function graph(data) {
+  const ymultiple = ymultipleSlider.value(); // Hent værdien fra slideren
+  background(0);
   const start = data["start"];
   const end = data["end"];
   const period_length = dateToDays(end, start);
@@ -39,33 +43,53 @@ function graph(data) {
       circle(x,y,1);
       last_rate[valuta] = data["rates"][key][valuta];
     }
-    fill(255,0,0);
-    stroke(255,0,0);
-    circle(int(last_time*step+xbuffer),højde-(1*ymultiple+ybuffer),4)
     last_time = key;
   }
-  axis(xbuffer,ybuffer-højde, step);
+  axis(period_length, start, ymultiple);
+  print(start, end);
 }
 
-function axis(x0, y0, step){
-  stroke(255,255,255);
-  fill(255,255,255);
-  line(x0,y0,bredde,y0);
-  line(x0,y0,x0,0);
-  let j = 0;
-  for (let i = 0; i < bredde; i+=200*step) {
-    text(int(j), x0+i, y0);
-    j+=200;
+function axis(period_length, start, ymultiple) {
+  stroke(173, 216, 230);
+  fill(173, 216, 230);
+  line(xbuffer, højde-ybuffer, bredde, højde-ybuffer); // Y-aksen
+  line(xbuffer, højde-ybuffer, xbuffer, 50); // X-aksen
+
+  const day_step = (bredde - xbuffer) / 10; // Divider bredden i 10 lige store trin
+  let i = 0;
+
+  for (let j = 0; j <= 9; j++) {
+    const day_label = Math.floor((period_length / 10) * j); // Beregn jævnt fordelte tal
+    text(day_label, xbuffer + i, højde - ybuffer + 10); // Vis tal på x-aksen
+    i += day_step; // Opdater i for næste trin
   }
 
+  // Tilføj label i enden af x-aksen
+  text(`dage fra ${start}`, bredde - 125, højde - ybuffer + 25);
+
+  const y_step = (højde - ybuffer - 50) / 20; // Divider højden i 10 lige store trin
+
+  i = 0;
+
+  for (let j = 0; j <= 19; j++) {
+    const y_label = Math.round(i/ymultiple); // Beregn jævnt fordelte tal
+    text(y_label, xbuffer - 30, højde - ybuffer - i); // Vis tal på y-aksen
+    i += y_step; // Opdater i for næste trin
+  }
+
+  // Tilføj label i enden af y-aksen
+  text("konversionsrate til base valuta", xbuffer, 50);
 }
+
+
+
 
 function dateToDays(dateString, referenceDate) {
   const date = new Date(dateString);
   referenceDate = new Date(referenceDate);
   const timeDifference = date - referenceDate;
   const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
-  return Math.floor(daysDifference);
+  return Math.round(daysDifference);
 }
 
 function formatJSON(data) {
@@ -103,6 +127,17 @@ function hslToRgb(h, s, l) {
 }
 
 
+function submit(){
+  let checked = [];
+  for(let i=0; i<checkboxes.length; i++){
+    if (checkboxes[i].checked()){
+    checked.push(valutas[i]);
+    print(valutas[i]);
+    }
+  }
+  getData(checked,baseValutaDropdown.selected())
+}
+
 function setup() {
   createCanvas(bredde, højde);
   background(0)
@@ -110,8 +145,26 @@ function setup() {
   dropdown();
   checkboxMenu();
   let submitButton = createButton('Submit selections').position(70,2)
-  submitButton.mousePressed(submit())
-  getData(valutas, 'EUR');
+  submitButton.mousePressed(submit);
+
+  ymultipleSlider = createSlider(0.01, 100, 50);
+  ymultipleSlider.position((bredde-800)/2, 50); // Placer slideren
+  ymultipleSlider.style('width', '800px'); 
+  ymultipleSlider.style('color', 'blue');
+  ymultipleSlider.input(updateValue);
+  ymultipleSlider.attribute('step', '0.01');
+
+  ymultipleLabel = createP('Y-zoom<br>Resubmit to update. Some valutas require lower zoom to appear').position((bredde-800)/2, 0);
+  ymultipleLabel.style('color', 'rgb(173, 216, 230)');
+
+  sliderValue = createP(`zoom: ${ymultipleSlider.value()}`);
+  sliderValue.position((bredde-800)/2, 60);
+  sliderValue.style('color', 'rgb(173, 216, 230)');
+}
+
+function updateValue() {
+  let val = ymultipleSlider.value();
+  sliderValue.html(`zoom: ${val}`);
 }
 
 function dropdown(){
@@ -121,35 +174,23 @@ function dropdown(){
   valutas.forEach(valuta => {
     baseValutaDropdown.option(valuta);
   });
-
-  baseValutaDropdown.changed(() =>  {
-    let selectedValuta = baseValutaDropdown.value();
-    console.log('Selected Valuta:', selectedValuta);
-  });
+  baseValutaDropdown.selected('EUR');
 }
 
 function checkboxMenu(){
   let i=0
-  valutas.forEach(valutaCheckbox => {
-    checkboxes[i]=createCheckbox(valutaCheckbox,false).position(0,30+i*20).style('color',colours[valutaCheckbox]);
+  valutas.forEach(valuta => {
+    checkboxes[i]=createCheckbox(valuta,false).position(0,30+i*20).style('color',colours[valuta]);
     i++
   })
 }
 
-function submit(){
-  let checked = [];
-  for(let i=0; i<checkboxes.length; i++){
-    if (checkboxes[i].checked){
-    checked.push(checkboxes[i].label)
-    }
-  }
-  getData(checked,baseValutaDropdown.selected())
-}
 
 function getData(selectedValutas, base){
-  let url = `https://api.frankfurter.dev/v1/1999-01-01..?base=${base}&symbols=`;
-  selectedValutas.forEach(valuta => url += `${valuta},`);
-  print(url);
+  let url = "https://api.frankfurter.dev/v1/1999-01-01..?base=" + base + "&symbols=";
+  for (const valuta of selectedValutas){
+    url += valuta + ",";
+  }
   return loadJSON(url,  data => {
     graph(formatJSON(data));
   });
