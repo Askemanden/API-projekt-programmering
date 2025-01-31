@@ -77,7 +77,7 @@ function axis(period_length, start, ymultiple) {
   }
 
   // Tilføj label i enden af y-aksen
-  text("konversionsrate til base valuta", xbuffer, 50);
+  text("amount per base valuta", xbuffer, 50);
 }
 
 
