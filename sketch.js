@@ -46,7 +46,6 @@ function graph(data) {
     last_time = key;
   }
   axis(period_length, start, ymultiple);
-  print(start, end);
 }
 
 function axis(period_length, start, ymultiple) {
@@ -132,7 +131,6 @@ function submit(){
   for(let i=0; i<checkboxes.length; i++){
     if (checkboxes[i].checked()){
     checked.push(valutas[i]);
-    print(valutas[i]);
     }
   }
   getData(checked,baseValutaDropdown.selected())
