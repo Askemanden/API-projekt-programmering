@@ -1,5 +1,5 @@
 let bredde = screen.width;   //bredden på skærmen
-let højde = screen.height*2;//højden
+let højde = screen.height*1.3;//højden
 const xbuffer = 100;
 const ybuffer = 50;
 let ymultipleSlider;
