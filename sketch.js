@@ -71,7 +71,7 @@ function axis(period_length, start, ymultiple) {
   i = 0;
 
   for (let j = 0; j <= 19; j++) {
-    const y_label = Math.round(i/ymultiple); // Beregn jævnt fordelte tal
+    const y_label = Math.round((i/ymultiple)*10)/10; // Beregn jævnt fordelte tal
     text(y_label, xbuffer - 30, højde - ybuffer - i); // Vis tal på y-aksen
     i += y_step; // Opdater i for næste trin
   }
