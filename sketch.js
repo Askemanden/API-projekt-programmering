@@ -167,8 +167,7 @@ function updateValue() {
 
 function dropdown(){
   baseValutaDropdown = createSelect(); 
-  baseValutaDropdown.position(4,2); //Remember to change pos coords when ui is made
-  
+  baseValutaDropdown.position(4,2);
   valutas.forEach(valuta => {
     baseValutaDropdown.option(valuta);
   });
