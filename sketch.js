@@ -64,7 +64,7 @@ function axis(period_length, start, ymultiple) {
   }
 
   // Tilføj label i enden af x-aksen
-  text(`dage fra ${start}`, bredde - 125, højde - ybuffer + 25);
+  text(`days since ${start}`, bredde - 125, højde - ybuffer + 25);
 
   const y_step = (højde - ybuffer - 50) / 20; // Divider højden i 10 lige store trin
 
